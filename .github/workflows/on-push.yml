@@ -64,7 +64,7 @@ jobs:
           pushd ${{ env.SRCPATH }}
           
           GO111MODULE=on GOOS=$os GOARCH=$arch go get ./...
-          GO111MODULE=on GOOS=$os GOARCH=$arch go build -o ${{ env.SRCPATH }}/monitoring-agent-client$suffix
+          GO111MODULE=on GOOS=$os GOARCH=$arch go build main.go -o ${{ env.SRCPATH }}/monitoring-agent-client$suffix
           popd
           cp ${{ env.SRCPATH }}/monitoring-agent-client$suffix ./release/monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-BIN/monitoring-agent-client$suffix
 
