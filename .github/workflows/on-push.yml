@@ -50,30 +50,6 @@ jobs:
         with:
           path: ${{ env.SRCPATH }}
 
-      - id: upload-wix-definition-file
-        if: ${{ matrix.os == 'windows' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: "${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-${{ needs.get-commit-sha.outputs.short-sha }}-wix-wxs"
-          path: "${{ env.SRCPATH }}/monitoring-agent-client.wxs"
-          if-no-files-found: error
-          
-      - id: upload-deb-build-files
-        if: ${{ matrix.os == 'linux' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: "${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-${{ needs.get-commit-sha.outputs.short-sha }}-DEBIAN"
-          path: "${{ env.SRCPATH }}/DEBIAN"
-          if-no-files-found: error
-
-      - id: upload-systemd-unit-file
-        if: ${{ matrix.os == 'linux' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: "${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-${{ needs.get-commit-sha.outputs.short-sha }}-systemd-unit-file"
-          path: "${{ env.SRCPATH }}/monitoring-agent-client.service"
-          if-no-files-found: error
-
       - id: dependencies-and-build
         run: |
           os=${{ matrix.os }}
