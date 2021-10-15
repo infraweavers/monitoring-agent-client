@@ -2,10 +2,13 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -16,9 +19,9 @@ func main() {
 	//template := flag.String("template", "", "pnp4nagios template")
 	hostname := flag.String("hostname", "", "hostname or ip")
 	port := flag.Int("port", 0, "port number")
-	//cacert := flag.String("cacert", "", "CA certificate")
-	//certificate := flag.String("certificate", "", "certificate file")
-	//key := flag.String("key", "", "key file")
+	cacert := flag.String("cacert", "", "CA certificate")
+	certificate := flag.String("certificate", "", "certificate file")
+	key := flag.String("key", "", "key file")
 	username := flag.String("username", "", "username")
 	password := flag.String("password", "", "password")
 	executable := flag.String("executable", "", "executable path")
@@ -48,6 +51,27 @@ func main() {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
+
+	certificateToLoad, _ := tls.LoadX509KeyPair(*certificate, *key)
+
+	certificatesCollection := []tls.Certificate{certificateToLoad}
+
+	caCert, err := ioutil.ReadFile(cacert)
+	if err != nil {
+		log.Fatal(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	transport := new(http.Transport)
+	transport.TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: false,
+		Certificates:       certificatesCollection,
+		RootCAs:            caCertPool,
+	}
+
+	client.Transport = transport
+
 	req, err := http.NewRequest(http.MethodPost, url, byteArrayBuffer)
 	if err != nil {
 		fmt.Println(fmt.Errorf("Got error %s", err.Error()))
