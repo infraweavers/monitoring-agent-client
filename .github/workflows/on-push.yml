@@ -58,21 +58,21 @@ jobs:
           echo "Building $os-$arch-$goversion"
           
           suffix=$([ "$os" == "windows" ] && echo ".exe" || echo "")
-          mkdir -p ./release/monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-${{needs.get-version-number.outputs.version}}-BIN
-          cp ${{ env.SRCPATH }}/configuration.json ${{ env.SRCPATH }}/LICENSE ${{ env.SRCPATH }}/server.crt ${{ env.SRCPATH }}/server.key ${{ env.SRCPATH }}/README.md ${{ env.SRCPATH }}/cacert.pem ./release/monitoring-agent-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-${{needs.get-version-number.outputs.version}}-BIN/.
+          mkdir -p ./release/monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-BIN
+          
           
           pushd ${{ env.SRCPATH }}
           
           GO111MODULE=on GOOS=$os GOARCH=$arch go get ./...
           GO111MODULE=on GOOS=$os GOARCH=$arch go build -o ${{ env.SRCPATH }}/monitoring-agent-client$suffix
           popd
-          cp ${{ env.SRCPATH }}/monitoring-agent-client$suffix ./release/monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-${{needs.get-version-number.outputs.version}}-BIN/monitoring-agent$suffix
+          cp ${{ env.SRCPATH }}/monitoring-agent-client$suffix ./release/monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-BIN/monitoring-agent-client$suffix
 
       - id: upload-builds
         uses: actions/upload-artifact@v2
         with:
-          name: "monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-${{needs.get-version-number.outputs.version}}-BIN"
-          path: release/monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-${{needs.get-version-number.outputs.version}}-BIN/
+          name: "monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-BIN"
+          path: release/monitoring-agent-client-${{ matrix.os }}-${{ matrix.arch }}-Go${{ matrix.go-version }}-BIN/
           if-no-files-found: error
           
   upload-binary-release-assets:
