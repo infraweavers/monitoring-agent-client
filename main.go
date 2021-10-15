@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"ioutil"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello, world.")
 	//template := flag.String("template", "", "pnp4nagios template")
 	hostname := flag.String("hostname", "", "hostname or ip")
 	port := flag.Int("port", 0, "port number")
@@ -27,10 +26,10 @@ func main() {
 	executable := flag.String("executable", "", "executable path")
 	executableArg := flag.String("executableArg", "", "executable arg for multiple specify multiple times")
 	script := flag.String("script", "", "script location")
-	timeout := flag.String("timeout", "", "timeout (e.g. 10s)")
+	timeout := flag.String("timeout", "10s", "timeout (e.g. 10s)")
 	flag.Parse()
 
-	scriptContent, err := ioutil.ReadFile(script) // the file is inside the local directory
+	scriptContent, err := ioutil.ReadFile(*script) // the file is inside the local directory
 	if err != nil {
 		fmt.Println("Err")
 	}
@@ -46,7 +45,7 @@ func main() {
 	byteArray, _ := json.Marshal(input)
 	byteArrayBuffer := bytes.NewBuffer(byteArray)
 
-	url := fmt.Sprintf("https://%s:%s/v1/runscriptstdin", hostname, port)
+	url := fmt.Sprintf("https://%s:%d/v1/runscriptstdin", *hostname, *port)
 
 	client := &http.Client{
 		Timeout: time.Second * 10,
@@ -56,7 +55,7 @@ func main() {
 
 	certificatesCollection := []tls.Certificate{certificateToLoad}
 
-	caCert, err := ioutil.ReadFile(cacert)
+	caCert, err := ioutil.ReadFile(*cacert)
 	if err != nil {
 		log.Fatal(err)
 	}
