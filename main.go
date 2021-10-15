@@ -34,9 +34,15 @@ func main() {
 		fmt.Println("Err")
 	}
 
+	scriptSignatureContent, err := ioutil.ReadFile(*script + ".minisig") // the file is inside the local directory
+	if err != nil {
+		fmt.Println("Err")
+	}
+
 	input := map[string]interface{}{
 		"path":            executable,
 		"args":            executableArg,
+		"stdinsignature":  scriptSignatureContent,
 		"stdin":           scriptContent,
 		"scriptarguments": flag.Args(),
 		"timeout":         timeout,
