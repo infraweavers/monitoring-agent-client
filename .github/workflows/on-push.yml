@@ -31,7 +31,7 @@ jobs:
         os: [linux, windows, freebsd]
         arch: [386, amd64]
 
-    needs: [test, get-commit-sha]
+    needs: [get-commit-sha]
 
     runs-on: ubuntu-latest
     
