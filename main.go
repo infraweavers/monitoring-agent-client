@@ -14,7 +14,20 @@ import (
 	"time"
 )
 
+type executableArgsType []string
+
+func (i *executableArgsType) String() string {
+	// change this, this is just can example to satisfy the interface
+	return "my string representation"
+}
+
+func (i *executableArgsType) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
 func main() {
+	var executableArgs executableArgsType
 	//template := flag.String("template", "", "pnp4nagios template")
 	hostname := flag.String("hostname", "", "hostname or ip")
 	port := flag.Int("port", 0, "port number")
@@ -24,7 +37,7 @@ func main() {
 	username := flag.String("username", "", "username")
 	password := flag.String("password", "", "password")
 	executable := flag.String("executable", "", "executable path")
-	executableArg := flag.String("executableArg", "", "executable arg for multiple specify multiple times")
+	flag.Var(&executableArgs, "executableArg", "executable arg for multiple specify multiple times")
 	script := flag.String("script", "", "script location")
 	timeout := flag.String("timeout", "10s", "timeout (e.g. 10s)")
 	flag.Parse()
@@ -41,13 +54,9 @@ func main() {
 		fmt.Println("Err")
 	}
 
-	execArgsArray := []string{
-		*executableArg,
-	}
-
 	input := map[string]interface{}{
 		"path":            executable,
-		"args":            execArgsArray,
+		"args":            executableArgs,
 		"stdinsignature":  string(scriptSignatureContent),
 		"stdin":           string(scriptContent),
 		"scriptarguments": flag.Args(),
