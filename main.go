@@ -52,7 +52,7 @@ func InvokeMonitoringAgent(hostname string, port int, username string, password 
 	timeoutDuration, _ := time.ParseDuration(timeout)
 
 	time.AfterFunc(timeoutDuration, func() {
-		fmt.Print("Timeout reached.")
+		fmt.Printf("Client timeout reached: %s\n", timeoutDuration)
 		os.Exit(3)
 	})
 
