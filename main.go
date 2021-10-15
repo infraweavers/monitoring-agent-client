@@ -14,6 +14,11 @@ import (
 	"time"
 )
 
+const okExitCode = 0
+const warningExitCode = 3
+const criticalExitCode = 2
+const unknownExitCode = 3
+
 type executableArgsType []string
 
 func (i *executableArgsType) String() string {
@@ -129,8 +134,8 @@ func main() {
 
 	fmt.Print(decodedResponse.Output)
 
-	if decodedResponse.Exitcode > 3 {
-		os.Exit(3)
+	if decodedResponse.Exitcode > unknownExitCode {
+		os.Exit(unknownExitCode)
 	}
 
 	os.Exit(decodedResponse.Exitcode)
