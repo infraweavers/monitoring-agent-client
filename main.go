@@ -34,16 +34,22 @@ func main() {
 		fmt.Println("Err")
 	}
 
-	scriptSignatureContent, err := ioutil.ReadFile(*script + ".minisig") // the file is inside the local directory
+	sigFile := fmt.Sprintf("%s%s", *script, ".minisig")
+
+	scriptSignatureContent, err := ioutil.ReadFile(sigFile) // the file is inside the local directory
 	if err != nil {
 		fmt.Println("Err")
 	}
 
+	execArgsArray := []string{
+		*executableArg,
+	}
+
 	input := map[string]interface{}{
 		"path":            executable,
-		"args":            executableArg,
-		"stdinsignature":  scriptSignatureContent,
-		"stdin":           scriptContent,
+		"args":            execArgsArray,
+		"stdinsignature":  string(scriptSignatureContent),
+		"stdin":           string(scriptContent),
 		"scriptarguments": flag.Args(),
 		"timeout":         timeout,
 	}
@@ -86,20 +92,27 @@ func main() {
 	if err != nil {
 		fmt.Println(fmt.Errorf("Got error %s", err.Error()))
 	}
+	//readAll, err := io.ReadAll(response.Body)
+	//fmt.Print(string(readAll))
+
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
 		fmt.Println("Response code: " + response.Status)
 	}
-
 	type MAResponse struct {
-		Output   string
-		Exitcode int
+		Output   string `json:"output"`
+		Exitcode int    `json:"exitcode"`
 	}
-
 	var decodedResponse MAResponse
-	json.NewDecoder(response.Body).Decode(decodedResponse)
-	fmt.Println(decodedResponse.Output)
+
+	decoder := json.NewDecoder(response.Body)
+	decoder.DisallowUnknownFields()
+	decoder.Decode(&decodedResponse)
+
+	fmt.Print(decodedResponse.Output)
+	//json.NewDecoder(response.Body).Decode(&decodedResponse)
+
 	if decodedResponse.Exitcode > 3 {
 		os.Exit(3)
 	}
