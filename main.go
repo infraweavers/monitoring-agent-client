@@ -14,28 +14,6 @@ import (
 	"time"
 )
 
-const okExitCode = 0
-const warningExitCode = 3
-const criticalExitCode = 2
-const unknownExitCode = 3
-
-type executableArgsType []string
-
-func (i *executableArgsType) String() string {
-	// change this, this is just can example to satisfy the interface
-	return "my string representation"
-}
-
-func (i *executableArgsType) Set(value string) error {
-	*i = append(*i, value)
-	return nil
-}
-
-type MAResponse struct {
-	Output   string `json:"output"`
-	Exitcode int    `json:"exitcode"`
-}
-
 func main() {
 	var executableArgs executableArgsType
 	_ = flag.String("template", "", "pnp4nagios template")
@@ -111,13 +89,13 @@ func main() {
 
 	req, err := http.NewRequest(http.MethodPost, url, byteArrayBuffer)
 	if err != nil {
-		fmt.Println(fmt.Errorf("Got error %s", err.Error()))
+		fmt.Println(fmt.Errorf("got error %s", err.Error()))
 	}
 	req.SetBasicAuth(*username, *password)
 
 	response, err := client.Do(req)
 	if err != nil {
-		fmt.Println(fmt.Errorf("Got error %s", err.Error()))
+		fmt.Println(fmt.Errorf("got error %s", err.Error()))
 	}
 
 	defer response.Body.Close()
