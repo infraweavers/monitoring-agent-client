@@ -26,10 +26,15 @@ func (i *executableArgsType) Set(value string) error {
 	return nil
 }
 
+type MAResponse struct {
+	Output   string `json:"output"`
+	Exitcode int    `json:"exitcode"`
+}
+
 func main() {
 	var executableArgs executableArgsType
-	//template := flag.String("template", "", "pnp4nagios template")
-	hostname := flag.String("hostname", "", "hostname or ip")
+	_ = flag.String("template", "", "pnp4nagios template")
+	hostname := flag.String("host", "", "hostname or ip")
 	port := flag.Int("port", 0, "port number")
 	cacert := flag.String("cacert", "", "CA certificate")
 	certificate := flag.String("certificate", "", "certificate file")
@@ -41,6 +46,13 @@ func main() {
 	script := flag.String("script", "", "script location")
 	timeout := flag.String("timeout", "10s", "timeout (e.g. 10s)")
 	flag.Parse()
+
+	timeoutDuration, _ := time.ParseDuration(*timeout)
+
+	time.AfterFunc(timeoutDuration, func() {
+		fmt.Print("Timeout reached.")
+		os.Exit(3)
+	})
 
 	scriptContent, err := ioutil.ReadFile(*script) // the file is inside the local directory
 	if err != nil {
@@ -69,7 +81,7 @@ func main() {
 	url := fmt.Sprintf("https://%s:%d/v1/runscriptstdin", *hostname, *port)
 
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: timeoutDuration,
 	}
 
 	certificateToLoad, _ := tls.LoadX509KeyPair(*certificate, *key)
@@ -97,22 +109,18 @@ func main() {
 		fmt.Println(fmt.Errorf("Got error %s", err.Error()))
 	}
 	req.SetBasicAuth(*username, *password)
+
 	response, err := client.Do(req)
 	if err != nil {
 		fmt.Println(fmt.Errorf("Got error %s", err.Error()))
 	}
-	//readAll, err := io.ReadAll(response.Body)
-	//fmt.Print(string(readAll))
 
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
 		fmt.Println("Response code: " + response.Status)
 	}
-	type MAResponse struct {
-		Output   string `json:"output"`
-		Exitcode int    `json:"exitcode"`
-	}
+
 	var decodedResponse MAResponse
 
 	decoder := json.NewDecoder(response.Body)
@@ -120,7 +128,6 @@ func main() {
 	decoder.Decode(&decodedResponse)
 
 	fmt.Print(decodedResponse.Output)
-	//json.NewDecoder(response.Body).Decode(&decodedResponse)
 
 	if decodedResponse.Exitcode > 3 {
 		os.Exit(3)
