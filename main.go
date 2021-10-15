@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"ioutil"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -57,4 +58,22 @@ func main() {
 		fmt.Println(fmt.Errorf("Got error %s", err.Error()))
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		fmt.Println("Response code: " + response.Status)
+	}
+
+	type MAResponse struct {
+		Output   string
+		Exitcode int
+	}
+
+	var decodedResponse MAResponse
+	json.NewDecoder(response.Body).Decode(decodedResponse)
+	fmt.Println(decodedResponse.Output)
+	if decodedResponse.Exitcode > 3 {
+		os.Exit(3)
+	}
+
+	os.Exit(decodedResponse.Exitcode)
 }
