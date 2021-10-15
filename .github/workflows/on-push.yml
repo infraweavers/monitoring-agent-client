@@ -109,7 +109,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: [get-commit-sha,make-release]
+    needs: [get-commit-sha]
 
     steps:
 
