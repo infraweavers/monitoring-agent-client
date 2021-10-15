@@ -15,63 +15,83 @@ import (
 )
 
 func main() {
-	var executableArgs executableArgsType
+
 	_ = flag.String("template", "", "pnp4nagios template")
+
 	hostname := flag.String("host", "", "hostname or ip")
-	port := flag.Int("port", 0, "port number")
-	cacert := flag.String("cacert", "", "CA certificate")
-	certificate := flag.String("certificate", "", "certificate file")
-	key := flag.String("key", "", "key file")
+	port := flag.Int("port", -1, "port number")
 	username := flag.String("username", "", "username")
 	password := flag.String("password", "", "password")
 	executable := flag.String("executable", "", "executable path")
-	flag.Var(&executableArgs, "executableArg", "executable arg for multiple specify multiple times")
 	script := flag.String("script", "", "script location")
+
+	cacert := flag.String("cacert", "", "CA certificate")
+	certificate := flag.String("certificate", "", "certificate file")
+	key := flag.String("key", "", "key file")
 	timeout := flag.String("timeout", "10s", "timeout (e.g. 10s)")
+
+	var executableArgs executableArguments
+	flag.Var(&executableArgs, "executableArg", "executable arg for multiple specify multiple times")
+
 	flag.Parse()
 
-	timeoutDuration, _ := time.ParseDuration(*timeout)
+	usernameFromEnvironment := os.Getenv("MONITORING_AGENT_USERNAME")
+	passwordFromEnvironment := os.Getenv("MONITORING_AGENT_PASSWORD")
+
+	if usernameFromEnvironment != "" {
+		username = &usernameFromEnvironment
+	}
+	if passwordFromEnvironment != "" {
+		password = &passwordFromEnvironment
+	}
+
+	InvokeMonitoringAgent(*hostname, *port, *username, *password, *executable, *script, *cacert, *certificate, *key, *timeout, executableArgs)
+}
+
+func InvokeMonitoringAgent(hostname string, port int, username string, password string, executable string, script string, cacert string, certificate string, key string, timeout string, executableArgs executableArguments) {
+	timeoutDuration, _ := time.ParseDuration(timeout)
 
 	time.AfterFunc(timeoutDuration, func() {
 		fmt.Print("Timeout reached.")
 		os.Exit(3)
 	})
 
-	scriptContent, err := ioutil.ReadFile(*script) // the file is inside the local directory
+	scriptContent, err := ioutil.ReadFile(script)
 	if err != nil {
-		fmt.Println("Err")
+		fmt.Printf("error, could not load script file: %s\n", err)
 	}
 
-	sigFile := fmt.Sprintf("%s%s", *script, ".minisig")
-
-	scriptSignatureContent, err := ioutil.ReadFile(sigFile) // the file is inside the local directory
-	if err != nil {
-		fmt.Println("Err")
-	}
-
-	input := map[string]interface{}{
+	restRequest := map[string]interface{}{
 		"path":            executable,
 		"args":            executableArgs,
-		"stdinsignature":  string(scriptSignatureContent),
 		"stdin":           string(scriptContent),
 		"scriptarguments": flag.Args(),
 		"timeout":         timeout,
 	}
 
-	byteArray, _ := json.Marshal(input)
+	sigFile := fmt.Sprintf("%s%s", script, ".minisig")
+	if FileExists(sigFile) {
+		scriptSignatureContent, err := ioutil.ReadFile(sigFile)
+		if err != nil {
+			fmt.Println("Err")
+		}
+		restRequest["stdinsignature"] = scriptSignatureContent
+	}
+
+	byteArray, _ := json.Marshal(restRequest)
 	byteArrayBuffer := bytes.NewBuffer(byteArray)
 
-	url := fmt.Sprintf("https://%s:%d/v1/runscriptstdin", *hostname, *port)
+	url := fmt.Sprintf("https://%s:%d/v1/runscriptstdin", hostname, port)
 
 	client := &http.Client{
 		Timeout: timeoutDuration,
 	}
 
-	certificateToLoad, _ := tls.LoadX509KeyPair(*certificate, *key)
+	certificateToLoad, _ := tls.LoadX509KeyPair(certificate, key)
 
 	certificatesCollection := []tls.Certificate{certificateToLoad}
 
-	caCert, err := ioutil.ReadFile(*cacert)
+	caCert, err := ioutil.ReadFile(cacert)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +111,7 @@ func main() {
 	if err != nil {
 		fmt.Println(fmt.Errorf("got error %s", err.Error()))
 	}
-	req.SetBasicAuth(*username, *password)
+	req.SetBasicAuth(username, password)
 
 	response, err := client.Do(req)
 	if err != nil {
