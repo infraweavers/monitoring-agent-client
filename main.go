@@ -132,7 +132,8 @@ func invokeClient(stdout io.Writer, httpClient httpclient.Interface) int {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return die(stdout, fmt.Sprintf("Response code: %s\n%#v", response.Status, response.Body))
+		errorBodyContent, _ := ioutil.ReadAll(response.Body)
+		return die(stdout, fmt.Sprintf("Response code: %d\n%s", response.StatusCode, errorBodyContent))
 	}
 
 	var decodedResponse MonitoringAgentResponse
