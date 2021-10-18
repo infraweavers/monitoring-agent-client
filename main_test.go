@@ -26,7 +26,7 @@ func TestArgumentParsing(t *testing.T) {
 			"-username", "thisismyusername",
 			"-password", "thisismypassword",
 			"-executable", "/path/to/executable",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 		}
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
 
@@ -35,7 +35,7 @@ func TestArgumentParsing(t *testing.T) {
 
 		actualOutput := buf.String()
 
-		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
@@ -57,14 +57,14 @@ func TestArgumentParsing(t *testing.T) {
 			"-username", "thisismyusername",
 			"-password", "thisismypassword",
 			"-executable", "/path/to/executable",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 			"-insecure",
 		}
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
-		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, true, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
@@ -120,7 +120,7 @@ func TestArgumentParsing(t *testing.T) {
 			"-username", "thisismyusername",
 			"-password", "thisismypassword",
 			"-executable", "/path/to/executable",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 			"-executableArg", "arg1",
 			"-executableArg", "arg2",
 		}
@@ -128,7 +128,7 @@ func TestArgumentParsing(t *testing.T) {
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
-		assert.Equal(t, `{"args":["arg1","arg2"],"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":["arg1","arg2"],"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
@@ -149,7 +149,7 @@ func TestArgumentParsing(t *testing.T) {
 			"-username", "thisismyusername",
 			"-password", "thisismypassword",
 			"-executable", "/path/to/executable",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 			"-executableArg", "arg1",
 			"-executableArg", "arg2",
 			"--", "scriptarg1", "-scriptarg scriptarg2", "-scriptarg", "scriptarg3", "--warning=3",
@@ -158,7 +158,7 @@ func TestArgumentParsing(t *testing.T) {
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
-		assert.Equal(t, `{"args":["arg1","arg2"],"path":"/path/to/executable","scriptarguments":["scriptarg1","-scriptarg scriptarg2","-scriptarg","scriptarg3","--warning=3"],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":["arg1","arg2"],"path":"/path/to/executable","scriptarguments":["scriptarg1","-scriptarg scriptarg2","-scriptarg","scriptarg3","--warning=3"],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
@@ -180,13 +180,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-executable", "/path/to/executable",
 			"-certificate", "server.crt",
 			"-key", "server.key",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 		}
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 1}`, 200)
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
-		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, 1, len(httpClient.Transport.TLSClientConfig.Certificates))
@@ -210,13 +210,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-password", "thisismypassword",
 			"-executable", "/path/to/executable",
 			"-cacert", "cacert.pem",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 		}
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 1}`, 200)
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
-		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.NotNil(t, httpClient.Transport.TLSClientConfig.RootCAs)
@@ -240,13 +240,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-certificate", "server.crt",
 			"-cacert", "cacert.pem",
 			"-key", "server.key",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 		}
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 1}`, 200)
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
-		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, 1, len(httpClient.Transport.TLSClientConfig.Certificates))
@@ -276,7 +276,7 @@ func TestArgumentParsing(t *testing.T) {
 			"-password", "thisismypassword",
 			"-executable", "/path/to/executable",
 			"-executableArg", "-s",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 			"-timeout", "1s",
 		}
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
@@ -286,7 +286,7 @@ func TestArgumentParsing(t *testing.T) {
 
 		actualOutput := buf.String()
 
-		assert.Equal(t, `{"args":["-s"],"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"1s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":["-s"],"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"1s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 1*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
@@ -313,7 +313,7 @@ func TestArgumentParsing(t *testing.T) {
 			"-password", "thisismypassword",
 			"-executable", "/path/to/executable",
 			"-executableArg", "-s",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 		}
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Error", "exitcode": 1}`, 400)
 
@@ -322,7 +322,7 @@ func TestArgumentParsing(t *testing.T) {
 
 		actualOutput := buf.String()
 
-		assert.Equal(t, `{"args":["-s"],"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":["-s"],"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
@@ -349,7 +349,7 @@ func TestArgumentParsing(t *testing.T) {
 			"-password", "thisismypassword",
 			"-executable", "/path/to/executable",
 			"-executableArg", "-s",
-			"-script", "README.md",
+			"-script", "TestScript-Valid.ps1",
 		}
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Error", "exitcode": 1}`, 401)
 
@@ -358,7 +358,7 @@ func TestArgumentParsing(t *testing.T) {
 
 		actualOutput := buf.String()
 
-		assert.Equal(t, `{"args":["-s"],"path":"/path/to/executable","scriptarguments":[],"stdin":"# monitoring-agent-client","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":["-s"],"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
