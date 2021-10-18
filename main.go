@@ -76,9 +76,6 @@ func invokeClient(stdout io.Writer, httpClient httpclient.Interface) int {
 		"timeout":         timeoutString,
 	}
 
-	byteArray, _ := json.Marshal(restRequest)
-	byteArrayBuffer := bytes.NewBuffer(byteArray)
-
 	url := fmt.Sprintf("https://%s:%d/v1/runscriptstdin", *hostname, *port)
 
 	httpClient.SetTimeout(timeout)
@@ -112,10 +109,13 @@ func invokeClient(stdout io.Writer, httpClient httpclient.Interface) int {
 		if err != nil {
 			return die(stdout, fmt.Sprintf("error loading script signature: %s", err.Error()))
 		}
-		restRequest["stdinsignature"] = scriptSignatureContent
+		restRequest["stdinsignature"] = string(scriptSignatureContent)
 	}
 
 	httpClient.SetTransport(transport)
+
+	byteArray, _ := json.Marshal(restRequest)
+	byteArrayBuffer := bytes.NewBuffer(byteArray)
 
 	req, err := http.NewRequest(http.MethodPost, url, byteArrayBuffer)
 	if err != nil {
