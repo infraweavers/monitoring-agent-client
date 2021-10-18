@@ -35,7 +35,23 @@ func main() {
 
 	flag.Parse()
 
-	timeoutDuration, _ := time.ParseDuration(*timeout)
+	if *hostname == "" {
+		panic("hostname is not set")
+	}
+	if *password == "" {
+		panic("password is not set")
+	}
+	if *executable == "" {
+		panic("executable is not set")
+	}
+	if *script == "" {
+		panic("script is not set")
+	}
+
+	timeoutDuration, timeoutParseError := time.ParseDuration(*timeout)
+	if timeoutParseError != nil {
+		panic(fmt.Errorf("error parsing timeout value %s", timeoutParseError.Error()))
+	}
 
 	time.AfterFunc(timeoutDuration, func() {
 		panic(fmt.Sprintf("Client timeout reached: %s\n", timeoutDuration))
