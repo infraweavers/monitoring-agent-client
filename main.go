@@ -121,7 +121,8 @@ func main() {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		fmt.Println("Response code: " + response.Status)
+		fmt.Printf("Response code: %s\n%#v", response.Status, response.Body)
+		os.Exit(unknownExitCode)
 	}
 
 	var decodedResponse MAResponse
