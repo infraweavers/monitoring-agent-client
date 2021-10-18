@@ -24,9 +24,9 @@ func main() {
 	executable := flag.String("executable", "", "executable path")
 	script := flag.String("script", "", "script location")
 
-	cacertificateFilePath := flag.String("cacert", "", "CA certificate")
-	certificateFilePath := flag.String("certificate", "", "certificate file")
-	privateKeyFilePath := flag.String("key", "", "key file")
+	cacertificateFilePath := flag.String("cacert", os.Getenv("MONITORING_AGENT_CA_CERTIFICATE_PATH"), "CA certificate")
+	certificateFilePath := flag.String("certificate", os.Getenv("MONITORING_AGENT_CLIENT_CERTIFICATE_PATH"), "certificate file")
+	privateKeyFilePath := flag.String("key", os.Getenv("MONITORING_AGENT_CLIENT_KEY_PATH"), "key file")
 	timeout := flag.String("timeout", "10s", "timeout (e.g. 10s)")
 	makeInsecure := flag.Bool("insecure", false, "ignore TLS Certificate checks")
 
