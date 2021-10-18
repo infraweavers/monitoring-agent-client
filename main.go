@@ -18,7 +18,7 @@ func main() {
 	_ = flag.String("template", "", "pnp4nagios template")
 
 	hostname := flag.String("host", "", "hostname or ip")
-	port := flag.Int("port", -1, "port number")
+	port := flag.Int("port", 9000, "port number")
 	username := flag.String("username", os.Getenv("MONITORING_AGENT_USERNAME"), "username")
 	password := flag.String("password", os.Getenv("MONITORING_AGENT_PASSWORD"), "password")
 	executable := flag.String("executable", "", "executable path")
@@ -46,9 +46,6 @@ func main() {
 	}
 	if *script == "" {
 		panic("script is not set")
-	}
-	if *port == -1 {
-		panic("port is not set")
 	}
 
 	timeoutDuration, timeoutParseError := time.ParseDuration(*timeout)
