@@ -369,4 +369,26 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, 3, actualExit)
 		assert.Equal(t, "Response code: 401\n{\"output\": \"Error\", \"exitcode\": 1}", actualOutput)
 	})
+
+	t.Run("Powershell scripts that don't end with 2 newlines should be rejected", func(t *testing.T) {
+		oldArgs := os.Args
+		defer func() { os.Args = oldArgs }()
+		flag.CommandLine = flag.NewFlagSet("flag", flag.ExitOnError)
+		os.Args = []string{
+			"main.exe",
+			"-host", "remotehost",
+			"-username", "thisismyusername",
+			"-password", "thisismypassword",
+			"-executable", "/path/to/executable",
+			"-script", "TestScript-Invalid.ps1",
+			"-insecure",
+		}
+		httpClient := httpclient.NewMockHTTPClient(`{}`, 200)
+		var buf bytes.Buffer
+		actualExit := invokeClient(&buf, httpClient)
+		actualOutput := buf.String()
+
+		assert.Equal(t, 3, actualExit)
+		assert.Equal(t, "Invalid powershell script, the script must end with two blank lines", actualOutput)
+	})
 }
