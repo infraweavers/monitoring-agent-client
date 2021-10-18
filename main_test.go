@@ -391,4 +391,39 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, 3, actualExit)
 		assert.Equal(t, "Invalid powershell script, the script must end with two blank lines", actualOutput)
 	})
+
+	t.Run("Powershell scripts with 2 unix line endings are just as valid as windows line endings", func(t *testing.T) {
+		// We manipuate the Args to set them up for the testcases
+		// After this test we restore the initial args
+		oldArgs := os.Args
+		defer func() { os.Args = oldArgs }()
+
+		flag.CommandLine = flag.NewFlagSet("flag", flag.ExitOnError)
+
+		os.Args = []string{
+			"main.exe",
+			"-host", "remotehost",
+			"-username", "thisismyusername",
+			"-password", "thisismypassword",
+			"-executable", "/path/to/executable",
+			"-script", "TestScript-Valid-UnixLineEndings.ps1",
+		}
+		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
+
+		var buf bytes.Buffer
+		actualExit := invokeClient(&buf, httpClient)
+
+		actualOutput := buf.String()
+
+		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\n\n","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, 10*time.Second, httpClient.Timeout)
+		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
+		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
+		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
+		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
+		assert.Equal(t, "POST", httpClient.RequestVerb)
+
+		assert.Equal(t, 2, actualExit)
+		assert.Equal(t, "Test output", actualOutput)
+	})
 }
