@@ -47,6 +47,9 @@ func main() {
 	if *script == "" {
 		panic("script is not set")
 	}
+	if *port == -1 {
+		panic("port is not set")
+	}
 
 	timeoutDuration, timeoutParseError := time.ParseDuration(*timeout)
 	if timeoutParseError != nil {
