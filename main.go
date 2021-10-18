@@ -7,14 +7,20 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"monitoring-agent-client/internal/httpclient"
 	"net/http"
 	"os"
 	"strings"
 )
 
 func main() {
+	httpClient := httpclient.NewHTTPClient()
+	os.Exit(invokeClient(os.Stdout, httpClient))
+}
 
+func invokeClient(stdout io.Writer, httpClient httpclient.Interface) int {
 	_ = flag.String("template", "", "pnp4nagios template")
 
 	hostname := flag.String("host", "", "hostname or ip")
@@ -36,29 +42,29 @@ func main() {
 	flag.Parse()
 
 	if *hostname == "" {
-		panic("hostname is not set")
+		return die(stdout, "hostname is not set")
 	}
 	if *password == "" {
-		panic("password is not set")
+		return die(stdout, "password is not set")
 	}
 	if *executable == "" {
-		panic("executable is not set")
+		return die(stdout, "executable is not set")
 	}
 	if *script == "" {
-		panic("script is not set")
+		return die(stdout, "script is not set")
 	}
 
 	timeout := enableTimeout(*timeoutString)
 
 	scriptContentByteArray, err := ioutil.ReadFile(*script)
 	if err != nil {
-		panic(fmt.Sprintf("error, could not load script file: %s\n", err))
+		return die(stdout, fmt.Sprintf("error, could not load script file: %s\n", err))
 	}
 	scriptContent := string(scriptContentByteArray)
 
 	if strings.HasSuffix(*script, ".ps1") {
 		if strings.HasSuffix(scriptContent, "\r\n\r\n") == false && strings.HasSuffix(scriptContent, "\n\n") == false {
-			panic("Invalid powershell script, the script must end with two blank lines")
+			return die(stdout, "Invalid powershell script, the script must end with two blank lines")
 		}
 	}
 
@@ -75,9 +81,8 @@ func main() {
 
 	url := fmt.Sprintf("https://%s:%d/v1/runscriptstdin", *hostname, *port)
 
-	client := &http.Client{
-		Timeout: timeout,
-	}
+	httpClient.SetTimeout(timeout)
+
 	transport := new(http.Transport)
 	transport.TLSClientConfig = &tls.Config{
 		InsecureSkipVerify: *makeInsecure,
@@ -86,7 +91,7 @@ func main() {
 	if *certificateFilePath != "" && *privateKeyFilePath != "" {
 		certificateToLoad, err := tls.LoadX509KeyPair(*certificateFilePath, *privateKeyFilePath)
 		if err != nil {
-			panic(fmt.Errorf("error loading certificate pair %s", err.Error()))
+			return die(stdout, fmt.Sprintf("error loading certificate pair %s", err.Error()))
 		}
 		transport.TLSClientConfig.Certificates = []tls.Certificate{certificateToLoad}
 	}
@@ -94,7 +99,7 @@ func main() {
 	if *cacertificateFilePath != "" {
 		caCertificate, err := ioutil.ReadFile(*cacertificateFilePath)
 		if err != nil {
-			panic(fmt.Errorf("error loading ca certificate %s", err.Error()))
+			return die(stdout, fmt.Sprintf("error loading ca certificate %s", err.Error()))
 		}
 		CACertificatePool := x509.NewCertPool()
 		CACertificatePool.AppendCertsFromPEM(caCertificate)
@@ -105,43 +110,42 @@ func main() {
 	if FileExists(scriptSignatureFilename) {
 		scriptSignatureContent, err := ioutil.ReadFile(scriptSignatureFilename)
 		if err != nil {
-			panic(fmt.Sprintf("error loading script signature: %s", err))
+			return die(stdout, fmt.Sprintf("error loading script signature: %s", err.Error()))
 		}
 		restRequest["stdinsignature"] = scriptSignatureContent
 	}
 
-	client.Transport = transport
+	httpClient.SetTransport(transport)
 
 	req, err := http.NewRequest(http.MethodPost, url, byteArrayBuffer)
 	if err != nil {
-		panic(fmt.Errorf("got error %s", err.Error()))
+		panic(fmt.Errorf("got http request error %s", err.Error()))
 	}
 	req.SetBasicAuth(*username, *password)
 
-	response, err := client.Do(req)
+	response, err := httpClient.Do(req)
 
 	if err != nil {
-		panic(fmt.Errorf("got error %s", err.Error()))
+		return die(stdout, fmt.Sprintf("got httpClient error %s", err.Error()))
 	}
 
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		fmt.Printf("Response code: %s\n%#v", response.Status, response.Body)
-		os.Exit(unknownExitCode)
+		return die(stdout, fmt.Sprintf("Response code: %s\n%#v", response.Status, response.Body))
 	}
 
-	var decodedResponse MAResponse
+	var decodedResponse MonitoringAgentResponse
 
 	decoder := json.NewDecoder(response.Body)
 	decoder.DisallowUnknownFields()
 	decoder.Decode(&decodedResponse)
 
-	fmt.Print(decodedResponse.Output)
+	fmt.Fprint(stdout, decodedResponse.Output)
 
 	if decodedResponse.Exitcode > unknownExitCode {
-		os.Exit(unknownExitCode)
+		return unknownExitCode
 	}
 
-	os.Exit(decodedResponse.Exitcode)
+	return decodedResponse.Exitcode
 }

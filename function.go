@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"time"
 )
@@ -17,7 +18,7 @@ func (i *executableArguments) Set(value string) error {
 	return nil
 }
 
-type MAResponse struct {
+type MonitoringAgentResponse struct {
 	Output   string `json:"output"`
 	Exitcode int    `json:"exitcode"`
 }
@@ -50,4 +51,9 @@ func enableTimeout(timeout string) time.Duration {
 		panic(fmt.Sprintf("Client timeout reached: %s\n", timeoutDuration))
 	})
 	return timeoutDuration
+}
+
+func die(stdout io.Writer, message string) int {
+	fmt.Fprint(stdout, message)
+	return unknownExitCode
 }
