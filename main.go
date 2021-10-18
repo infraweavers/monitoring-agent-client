@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -57,15 +58,22 @@ func main() {
 		panic(fmt.Sprintf("Client timeout reached: %s\n", timeoutDuration))
 	})
 
-	scriptContent, err := ioutil.ReadFile(*script)
+	scriptContentByteArray, err := ioutil.ReadFile(*script)
 	if err != nil {
 		panic(fmt.Sprintf("error, could not load script file: %s\n", err))
+	}
+	scriptContent := string(scriptContentByteArray)
+
+	if strings.HasSuffix(*script, ".ps1") {
+		if strings.HasSuffix(scriptContent, "\r\n\r\n") == false && strings.HasSuffix(scriptContent, "\n\n") == false {
+			panic("Invalid powershell script, the script must end with two blank lines")
+		}
 	}
 
 	restRequest := map[string]interface{}{
 		"path":            executable,
 		"args":            executableArgs,
-		"stdin":           string(scriptContent),
+		"stdin":           scriptContent,
 		"scriptarguments": flag.Args(),
 		"timeout":         timeout,
 	}
