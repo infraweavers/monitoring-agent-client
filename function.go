@@ -2,7 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"time"
 )
 
 func (i *executableArguments) String() string {
@@ -36,4 +38,16 @@ func FileExists(name string) bool {
 		return false
 	}
 	return false
+}
+
+func enableTimeout(timeout string) time.Duration {
+	timeoutDuration, timeoutParseError := time.ParseDuration(timeout)
+	if timeoutParseError != nil {
+		panic(fmt.Errorf("error parsing timeout value %s", timeoutParseError.Error()))
+	}
+
+	time.AfterFunc(timeoutDuration, func() {
+		panic(fmt.Sprintf("Client timeout reached: %s\n", timeoutDuration))
+	})
+	return timeoutDuration
 }

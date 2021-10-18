@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 )
 
 func main() {
@@ -28,7 +27,7 @@ func main() {
 	cacertificateFilePath := flag.String("cacert", os.Getenv("MONITORING_AGENT_CA_CERTIFICATE_PATH"), "CA certificate")
 	certificateFilePath := flag.String("certificate", os.Getenv("MONITORING_AGENT_CLIENT_CERTIFICATE_PATH"), "certificate file")
 	privateKeyFilePath := flag.String("key", os.Getenv("MONITORING_AGENT_CLIENT_KEY_PATH"), "key file")
-	timeout := flag.String("timeout", "10s", "timeout (e.g. 10s)")
+	timeoutString := flag.String("timeout", "10s", "timeout (e.g. 10s)")
 	makeInsecure := flag.Bool("insecure", false, "ignore TLS Certificate checks")
 
 	var executableArgs executableArguments
@@ -49,14 +48,7 @@ func main() {
 		panic("script is not set")
 	}
 
-	timeoutDuration, timeoutParseError := time.ParseDuration(*timeout)
-	if timeoutParseError != nil {
-		panic(fmt.Errorf("error parsing timeout value %s", timeoutParseError.Error()))
-	}
-
-	time.AfterFunc(timeoutDuration, func() {
-		panic(fmt.Sprintf("Client timeout reached: %s\n", timeoutDuration))
-	})
+	timeout := enableTimeout(*timeoutString)
 
 	scriptContentByteArray, err := ioutil.ReadFile(*script)
 	if err != nil {
@@ -84,7 +76,7 @@ func main() {
 	url := fmt.Sprintf("https://%s:%d/v1/runscriptstdin", *hostname, *port)
 
 	client := &http.Client{
-		Timeout: timeoutDuration,
+		Timeout: timeout,
 	}
 	transport := new(http.Transport)
 	transport.TLSClientConfig = &tls.Config{
