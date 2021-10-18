@@ -73,7 +73,7 @@ func invokeClient(stdout io.Writer, httpClient httpclient.Interface) int {
 		"args":            executableArgs,
 		"stdin":           scriptContent,
 		"scriptarguments": flag.Args(),
-		"timeout":         timeout,
+		"timeout":         timeoutString,
 	}
 
 	byteArray, _ := json.Marshal(restRequest)
