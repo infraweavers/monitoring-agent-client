@@ -19,8 +19,8 @@ func main() {
 
 	hostname := flag.String("host", "", "hostname or ip")
 	port := flag.Int("port", -1, "port number")
-	username := flag.String("username", "", "username")
-	password := flag.String("password", "", "password")
+	username := flag.String("username", os.Getenv("MONITORING_AGENT_USERNAME"), "username")
+	password := flag.String("password", os.Getenv("MONITORING_AGENT_PASSWORD"), "password")
 	executable := flag.String("executable", "", "executable path")
 	script := flag.String("script", "", "script location")
 
@@ -34,16 +34,6 @@ func main() {
 	flag.Var(&executableArgs, "executableArg", "executable arg for multiple specify multiple times")
 
 	flag.Parse()
-
-	usernameFromEnvironment := os.Getenv("MONITORING_AGENT_USERNAME")
-	passwordFromEnvironment := os.Getenv("MONITORING_AGENT_PASSWORD")
-
-	if usernameFromEnvironment != "" {
-		username = &usernameFromEnvironment
-	}
-	if passwordFromEnvironment != "" {
-		password = &passwordFromEnvironment
-	}
 
 	timeoutDuration, _ := time.ParseDuration(*timeout)
 
