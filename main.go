@@ -70,15 +70,6 @@ func main() {
 		"timeout":         timeout,
 	}
 
-	scriptSignatureFilename := fmt.Sprintf("%s%s", *script, ".minisig")
-	if FileExists(scriptSignatureFilename) {
-		scriptSignatureContent, err := ioutil.ReadFile(scriptSignatureFilename)
-		if err != nil {
-			panic(fmt.Sprintf("error loading script signature: %s", err))
-		}
-		restRequest["stdinsignature"] = scriptSignatureContent
-	}
-
 	byteArray, _ := json.Marshal(restRequest)
 	byteArrayBuffer := bytes.NewBuffer(byteArray)
 
@@ -108,6 +99,15 @@ func main() {
 		CACertificatePool := x509.NewCertPool()
 		CACertificatePool.AppendCertsFromPEM(caCertificate)
 		transport.TLSClientConfig.RootCAs = CACertificatePool
+	}
+
+	scriptSignatureFilename := fmt.Sprintf("%s%s", *script, ".minisig")
+	if FileExists(scriptSignatureFilename) {
+		scriptSignatureContent, err := ioutil.ReadFile(scriptSignatureFilename)
+		if err != nil {
+			panic(fmt.Sprintf("error loading script signature: %s", err))
+		}
+		restRequest["stdinsignature"] = scriptSignatureContent
 	}
 
 	client.Transport = transport
