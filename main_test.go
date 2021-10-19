@@ -98,7 +98,7 @@ func TestArgumentParsing(t *testing.T) {
 
 		actualOutput := buf.String()
 
-		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"#!/perl\r\n\r\nprint \"this is a test script\"\r\n","stdinsignature":"untrusted comment: signature from minisign secret key\r\nRWQ3ly9IPenQ6Uowh2brPvynWtDtby5HBYqhLDD4JsqJrr9ibkkgMKMOBiDBJ0odnPSsgxTQdS2sJGmLFq4zvCUxzTlVb3XzxQs=\r\ntrusted comment: timestamp:1634575657\tfile:TestScript.pl\r\n2stLaDgFJrNUch8covbbOKFwBy+nhdDMXV4t/r4Zgs4j3wNh8ZzdPBevDQ1m9SkTT5EPL0UWp7qPDT6G2/E9DA==\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"#!/perl\n\nprint \"this is a test script\"\n","stdinsignature":"untrusted comment: signature from minisign secret key\r\nRWQ3ly9IPenQ6Uowh2brPvynWtDtby5HBYqhLDD4JsqJrr9ibkkgMKMOBiDBJ0odnPSsgxTQdS2sJGmLFq4zvCUxzTlVb3XzxQs=\r\ntrusted comment: timestamp:1634575657\tfile:TestScript.pl\r\n2stLaDgFJrNUch8covbbOKFwBy+nhdDMXV4t/r4Zgs4j3wNh8ZzdPBevDQ1m9SkTT5EPL0UWp7qPDT6G2/E9DA==\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
