@@ -1,5 +1,7 @@
 # monitoring-agent-client
 
-Reimplementation of https://github.com/infraweavers/monitoring-agent-scripts/blob/main/check_script_via_monitoring-agent.pl in go, to aid scaling and performance from the OMD/naemon instance as the perl implementation will take approximately 300ms for all checks (in our environment) whereas the go implementation takes about 100ms. 
+This is a go reimplementation of the perl [check_script_via_monitoring-agent.pl](https://github.com/infraweavers/monitoring-agent-scripts/blob/main/check_script_via_monitoring-agent.pl). 
 
-For comparison, nrpe takes approximately 130ms.
+This should have comparable performance/load on the monitoring-server (i.e. Nagios/Naemon/OMD), in our testing a check was ~110ms vs ~130ms for nrpe.
+
+The perl implementation has a significantly higher cost of execution (approx 300ms) so if there is an issue with load on the monitoring server itself, it would be wise to transition to using this implementation.
