@@ -75,6 +75,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
+
 		assert.Equal(t, 2, actualExit)
 		assert.Equal(t, "Test output", actualOutput)
 	})
@@ -142,6 +143,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
+
 		assert.Equal(t, 2, actualExit)
 		assert.Equal(t, "Test output", actualOutput)
 	})
@@ -176,6 +178,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
+
 		assert.Equal(t, 2, actualExit)
 		assert.Equal(t, "Test output", actualOutput)
 	})
@@ -210,6 +213,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
+
 		assert.Equal(t, 1, actualExit)
 		assert.Equal(t, "Test output", actualOutput)
 	})
@@ -242,6 +246,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
+
 		assert.Equal(t, 1, actualExit)
 		assert.Equal(t, "Test output", actualOutput)
 	})
@@ -278,6 +283,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
+
 		assert.Equal(t, 1, actualExit)
 		assert.Equal(t, "Test output", actualOutput)
 	})
@@ -349,6 +355,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
+
 		assert.Equal(t, 3, actualExit)
 		assert.Equal(t, "Response code: 400\n{\"output\": \"Error\", \"exitcode\": 1}", actualOutput)
 	})
@@ -441,6 +448,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
+
 		assert.Equal(t, 2, actualExit)
 		assert.Equal(t, "Test output", actualOutput)
 	})
