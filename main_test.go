@@ -75,7 +75,7 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "Test output", actualOutput)
 	})
 
-	t.Run("Basic test returns 200 and renders correct exit code", func(t *testing.T) {
+	t.Run("Basic test returns 200 and renders correct exit code with a perl script", func(t *testing.T) {
 		// We manipuate the Args to set them up for the testcases
 		// After this test we restore the initial args
 		oldArgs := os.Args
@@ -98,7 +98,7 @@ func TestArgumentParsing(t *testing.T) {
 
 		actualOutput := buf.String()
 
-		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"#!/perl\n\nprint \"this is a test script\"\n","stdinsignature":"untrusted comment: signature from minisign secret key\r\nRWQ3ly9IPenQ6Uowh2brPvynWtDtby5HBYqhLDD4JsqJrr9ibkkgMKMOBiDBJ0odnPSsgxTQdS2sJGmLFq4zvCUxzTlVb3XzxQs=\r\ntrusted comment: timestamp:1634575657\tfile:TestScript.pl\r\n2stLaDgFJrNUch8covbbOKFwBy+nhdDMXV4t/r4Zgs4j3wNh8ZzdPBevDQ1m9SkTT5EPL0UWp7qPDT6G2/E9DA==\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
+		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"#!/perl\n\nprint \"this is a test script\"\n","stdinsignature":"untrusted comment: signature from minisign secret key\r\nRWTV8L06+shYI3jk77ofKAmdXcat5J7EVM/6JLX3ssHhRFqqIAU1vc49KF9Hn3+kO/+k6bFBND+W40LZM8ae4TtQY2NF6HaBpAI=\r\ntrusted comment: timestamp:1634631414\tfile:TestScript.pl\r\nixE4k+I3rIX1S3aTt/q4rTx9aZUygKYITgPQFkbnq+WPq4TwtW4Q9LmDMr5caG5FlPxWT6ve8rvBjZXxkogHBw==\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
 		assert.Equal(t, "Basic dGhpc2lzbXl1c2VybmFtZTp0aGlzaXNteXBhc3N3b3Jk", httpClient.RequestHeaders["Authorization"][0])
