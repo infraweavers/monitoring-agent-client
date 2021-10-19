@@ -32,7 +32,6 @@ func TestArgumentParsing(t *testing.T) {
 
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
-
 		actualOutput := buf.String()
 
 		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
@@ -50,7 +49,9 @@ func TestArgumentParsing(t *testing.T) {
 	t.Run("Insecure basic test returns 200 and renders correct exit code", func(t *testing.T) {
 		oldArgs := os.Args
 		defer func() { os.Args = oldArgs }()
+
 		flag.CommandLine = flag.NewFlagSet("flag", flag.ExitOnError)
+
 		os.Args = []string{
 			"main.exe",
 			"-host", "remotehost",
@@ -60,10 +61,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-script", "TestScript-Valid.ps1",
 			"-insecure",
 		}
+
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
+
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
+
 		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, true, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
@@ -95,7 +99,6 @@ func TestArgumentParsing(t *testing.T) {
 
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
-
 		actualOutput := buf.String()
 
 		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"#!/perl\n\nprint \"this is a test script\"\n","stdinsignature":"untrusted comment: signature from minisign secret key\r\nRWTV8L06+shYI3jk77ofKAmdXcat5J7EVM/6JLX3ssHhRFqqIAU1vc49KF9Hn3+kO/+k6bFBND+W40LZM8ae4TtQY2NF6HaBpAI=\r\ntrusted comment: timestamp:1634631414\tfile:TestScript.pl\r\nixE4k+I3rIX1S3aTt/q4rTx9aZUygKYITgPQFkbnq+WPq4TwtW4Q9LmDMr5caG5FlPxWT6ve8rvBjZXxkogHBw==\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
@@ -114,6 +117,7 @@ func TestArgumentParsing(t *testing.T) {
 		oldArgs := os.Args
 		defer func() { os.Args = oldArgs }()
 		flag.CommandLine = flag.NewFlagSet("flag", flag.ExitOnError)
+
 		os.Args = []string{
 			"main.exe",
 			"-host", "remotehost",
@@ -124,10 +128,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-executableArg", "arg1",
 			"-executableArg", "arg2",
 		}
+
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
+
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
+
 		assert.Equal(t, `{"args":["arg1","arg2"],"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
@@ -143,6 +150,7 @@ func TestArgumentParsing(t *testing.T) {
 		oldArgs := os.Args
 		defer func() { os.Args = oldArgs }()
 		flag.CommandLine = flag.NewFlagSet("flag", flag.ExitOnError)
+
 		os.Args = []string{
 			"main.exe",
 			"-host", "remotehost",
@@ -154,10 +162,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-executableArg", "arg2",
 			"--", "scriptarg1", "-scriptarg scriptarg2", "-scriptarg", "scriptarg3", "--warning=3",
 		}
+
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
+
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
+
 		assert.Equal(t, `{"args":["arg1","arg2"],"path":"/path/to/executable","scriptarguments":["scriptarg1","-scriptarg scriptarg2","-scriptarg","scriptarg3","--warning=3"],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
@@ -182,10 +193,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-key", "server.key",
 			"-script", "TestScript-Valid.ps1",
 		}
+
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 1}`, 200)
+
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
+
 		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
@@ -204,6 +218,7 @@ func TestArgumentParsing(t *testing.T) {
 		oldArgs := os.Args
 		defer func() { os.Args = oldArgs }()
 		flag.CommandLine = flag.NewFlagSet("flag", flag.ExitOnError)
+
 		os.Args = []string{"main.exe",
 			"-host", "remotehost",
 			"-username", "thisismyusername",
@@ -212,10 +227,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-cacert", "cacert.pem",
 			"-script", "TestScript-Valid.ps1",
 		}
+
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 1}`, 200)
+
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
+
 		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
@@ -242,10 +260,13 @@ func TestArgumentParsing(t *testing.T) {
 			"-key", "server.key",
 			"-script", "TestScript-Valid.ps1",
 		}
+
 		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 1}`, 200)
+
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
+
 		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
 		assert.Equal(t, 10*time.Second, httpClient.Timeout)
 		assert.Equal(t, false, httpClient.Transport.TLSClientConfig.InsecureSkipVerify)
@@ -279,11 +300,10 @@ func TestArgumentParsing(t *testing.T) {
 			"-script", "TestScript-Valid.ps1",
 			"-timeout", "1s",
 		}
-		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
 
+		httpClient := httpclient.NewMockHTTPClient(`{"output": "Test output", "exitcode": 2}`, 200)
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
-
 		actualOutput := buf.String()
 
 		assert.Equal(t, `{"args":["-s"],"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"1s"}`, httpClient.RequestBodyContent)
@@ -329,7 +349,6 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
-
 		assert.Equal(t, 3, actualExit)
 		assert.Equal(t, "Response code: 400\n{\"output\": \"Error\", \"exitcode\": 1}", actualOutput)
 	})
@@ -355,7 +374,6 @@ func TestArgumentParsing(t *testing.T) {
 
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
-
 		actualOutput := buf.String()
 
 		assert.Equal(t, `{"args":["-s"],"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\r\n\r\n","timeout":"10s"}`, httpClient.RequestBodyContent)
@@ -383,7 +401,9 @@ func TestArgumentParsing(t *testing.T) {
 			"-script", "TestScript-Invalid.ps1",
 			"-insecure",
 		}
+
 		httpClient := httpclient.NewMockHTTPClient(`{}`, 200)
+
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
 		actualOutput := buf.String()
@@ -412,7 +432,6 @@ func TestArgumentParsing(t *testing.T) {
 
 		var buf bytes.Buffer
 		actualExit := invokeClient(&buf, httpClient)
-
 		actualOutput := buf.String()
 
 		assert.Equal(t, `{"args":null,"path":"/path/to/executable","scriptarguments":[],"stdin":"Write-Host \"This is a test script\"\n\n","timeout":"10s"}`, httpClient.RequestBodyContent)
@@ -422,7 +441,6 @@ func TestArgumentParsing(t *testing.T) {
 		assert.Equal(t, "remotehost:9000", httpClient.RequestHost)
 		assert.Equal(t, "/v1/runscriptstdin", httpClient.RequestURI.Path)
 		assert.Equal(t, "POST", httpClient.RequestVerb)
-
 		assert.Equal(t, 2, actualExit)
 		assert.Equal(t, "Test output", actualOutput)
 	})
